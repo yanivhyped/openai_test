@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Scroll Speed Ad Injection Demo</title>
+  <style>
+    .item {
+      height: 500px;
+      border: 1px solid black;
+      margin-bottom: 20px;
+    }
+
+    .scrolled {
+      background-color: lightgray;
+    }
+  </style>
+</head>
+<body>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+
+  <script>
+let itemCounter = 0;
+let lastScrollTime = Date.now();
+let lastScrollY = window.scrollY;
+let scrollSpeeds = [];
+
+// set the time frame and item threshold
+const timeFrame = 1000; // 1 second
+const itemThreshold = 3; // user must scroll past at least 3 items in 1 second
+
+// create an array of items to observe
+const items = document.querySelectorAll(".item");
+
+// create an IntersectionObserver
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      if (!entry.target.classList.contains("scrolled")) {
+        itemCounter++;
+        entry.target.classList.add("scrolled");
+      }
+    } else {
+      entry.target.classList.remove("scrolled");
+    }
+  });
+}, {
+  threshold: 0.5 // trigger when 50% of the item is visible in the viewport
+});
+
+// observe each item
+items.forEach(item => {
+  observer.observe(item);
+});
+
+// create a timer to reset item counter and scroll speeds
+setInterval(() => {
+  const now = Date.now();
+  const timeDiff = now - lastScrollTime;
+  if (timeDiff > timeFrame) {
+    itemCounter = 0;
+    scrollSpeeds = [];
+  }
+  lastScrollTime = now;
+
+  // check if user is scrolling slowly or predict if they will scroll fast
+  if (itemCounter < itemThreshold && scrollSpeeds.length > 0) {
+    const avgSpeed = scrollSpeeds.reduce((a, b) => a + b, 0) / scrollSpeeds.length;
+    const itemsLeft = items.length - itemCounter;
+    const timeLeft = timeFrame - timeDiff;
+    const predictedSpeed = itemsLeft > 0 ? timeLeft / itemsLeft : avgSpeed;
+    if (predictedSpeed < avgSpeed) {
+      // your ad injection code goes here
+      console.log("Injecting ad for slow reader with predicted speed", predictedSpeed);
+    }
+  }
+
+}, timeFrame);
+
+// track scroll speed
+window.addEventListener('scroll', () => {
+  const now = Date.now();
+  const timeDiff = now - lastScrollTime;
+  const scrollDiff = Math.abs(window.scrollY - lastScrollY);
+  const scrollSpeed = timeDiff > 0 ? scrollDiff / timeDiff : 0;
+  scrollSpeeds.push(scrollSpeed);
+  lastScrollTime = now;
+  lastScrollY = window.scrollY;
+});
+
+  </script>
+</body>
+</html>
